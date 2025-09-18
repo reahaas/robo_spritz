@@ -85,43 +85,43 @@ class Direction_Module:
         return h, v
 
 # Example usage
-if __name__ == "__main__":
-    # Initialize the direction module
-    direction_module = Direction_Module(tolerance=10)
-    
-    # Initialize camera
-    cap = cv2.VideoCapture(0)
-    
-    if not cap.isOpened():
-        print("Error: Could not open camera")
-        exit()
-    
-    print("Direction Module Test - Press 'q' to quit")
-    print("This will continuously show h and v direction values")
-    
-    try:
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            
-            # Get direction
-            h, v = direction_module.get_direction(frame)
-            
-            # Print direction values
-            print(f"Direction: h={h}, v={v}")
-            
-            # Display frame (optional, for visual feedback)
-            cv2.imshow('Direction Module Test', frame)
-            
-            # Check for quit
-            if cv2.waitKey(100) & 0xFF == ord('q'):  # Check every 100ms
-                break
-                
-    except KeyboardInterrupt:
-        print("\nStopped by user")
-    
-    finally:
-        cap.release()
-        cv2.destroyAllWindows()
-        print("Direction Module test completed")
+# if __name__ == "__main__":
+#     # Initialize the direction module
+#     direction_module = Direction_Module(tolerance=10)
+#     
+#     # Initialize camera
+#     cap = cv2.VideoCapture(0)
+#     
+#     if not cap.isOpened():
+#         print("Error: Could not open camera")
+#         exit()
+#     
+#     print("Direction Module Test - Press 'q' to quit")
+#     print("This will continuously show h and v direction values")
+#     
+#     try:
+#         while True:
+#             ret, frame = cap.read()
+#             if not ret:
+#                 break
+#             
+#             # Get direction
+#             h, v = direction_module.get_direction(frame)
+#             
+#             # Print direction values
+#             print(f"Direction: h={h}, v={v}")
+#             
+#             # Display frame (optional, for visual feedback)
+#             cv2.imshow('Direction Module Test', frame)
+#             
+#             # Check for quit
+#             if cv2.waitKey(100) & 0xFF == ord('q'):  # Check every 100ms
+#                 break
+#                 
+#     except KeyboardInterrupt:
+#         print("\nStopped by user")
+#     
+#     finally:
+#         cap.release()
+#         cv2.destroyAllWindows()
+#         print("Direction Module test completed")
