@@ -74,43 +74,43 @@ def capture_images():
             cv2.circle(display_frame, (frame_center_x, frame_center_y), 5, (0, 0, 255), -1)
             cv2.circle(display_frame, (frame_center_x, frame_center_y), tolerance, (0, 0, 255), 2)
             
-            # Provide directional guidance every 2 seconds
+            # Calculate directional parameters and save conditions
             current_time = time.time()
-            if face_center_x is not None and (current_time - last_direction_time) >= direction_interval:
+            horizontal, vertical = 0, 0  # Default values
+            
+            if face_center_x is not None:
                 # Calculate offsets
                 offset_x = face_center_x - frame_center_x
                 offset_y = face_center_y - frame_center_y
                 
-                # Generate direction instructions
-                directions = []
+                # Calculate numerical direction parameters
+                # Horizontal: 1 if face is to the right, -1 if to the left, 0 if within tolerance
                 if abs(offset_x) > tolerance:
-                    if offset_x > 0:
-                        directions.append("LEFT")  # Face is to the right, move camera left
-                    else:
-                        directions.append("RIGHT")  # Face is to the left, move camera right
-                
-                if abs(offset_y) > tolerance:
-                    if offset_y > 0:
-                        directions.append("UP")  # Face is below center, move camera up
-                    else:
-                        directions.append("DOWN")  # Face is above center, move camera down
-                
-                if directions:
-                    print(f"Direction: Move {' and '.join(directions)} (Face offset: X={offset_x}, Y={offset_y})")
+                    horizontal = 1 if offset_x > 0 else -1
                 else:
-                    print("Face is CENTERED! (within tolerance)")
+                    horizontal = 0
                 
-                last_direction_time = current_time
+                # Vertical: 1 if face is above center, -1 if below center, 0 if within tolerance
+                if abs(offset_y) > tolerance:
+                    vertical = 1 if offset_y < 0 else -1  # Negative offset_y means face is above center
+                else:
+                    vertical = 0
+                
+                # Provide directional guidance every 2 seconds
+                if (current_time - last_direction_time) >= direction_interval:
+                    print(f"Direction - Horizontal: {horizontal}, Vertical: {vertical} (Face offset: X={offset_x}, Y={offset_y})")
+                    last_direction_time = current_time
             
-            # Check if faces are detected and enough time has passed for saving
-            if len(faces) > 0 and (current_time - last_save_time) >= save_interval:
+            # Check if faces are detected, face is centered, and enough time has passed for saving
+            if (len(faces) > 0 and horizontal == 0 and vertical == 0 and 
+                (current_time - last_save_time) >= save_interval):
                 # Generate timestamp for filename
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"{output_dir}/face_detected_{timestamp}.jpg"
+                filename = f"{output_dir}/face_centered_{timestamp}.jpg"
                 
                 # Save the frame with face rectangles drawn
                 cv2.imwrite(filename, display_frame)
-                print(f"Face detected! Image saved: {filename}")
+                print(f"Face CENTERED! Image saved: {filename}")
                 last_save_time = current_time
             
             # Display the frame with face rectangles
