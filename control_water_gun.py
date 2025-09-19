@@ -10,32 +10,27 @@ def main():
 
     print("Starting water gun control. Press Ctrl+C to stop.")
 
-    try:
-        while True:
-            # Simulate getting a frame from the camera
-            frame = camera.get_frame()
+    while True:
+        # Simulate getting a frame from the camera
+        frame = camera.get_frame()
 
-            # Get direction from the navigator
-            h, v = navigator.get_direction(frame)
+        # Get direction from the navigator
+        h, v = navigator.get_direction(frame)
 
-            # Control the water gun based on direction
+        # Control the water gun based on direction
 
-            h_direction = "cw" if h==1 else "ccw"
-            v_direction = "cw" if v==1 else "ccw"
+        h_direction = "cw" if h==1 else "ccw"
+        v_direction = "cw" if v==1 else "ccw"
 
-            if h == 1:
-                controller.move_step(channel=0, direction="cw", speed=50)  # Rotate right
-            elif h == -1:
-                controller.rotate(channel=0, direction="ccw", speed=50)  # Rotate left
-            else:
-                controller.stop(channel=0)  # Stop horizontal movement
+        if h != 0:
+            controller.move_step(channel=0, direction=h_direction, speed=0.1)
+        else:
+            controller.move_step(channel=0)  # Stop horizontal movement
 
-            if v == 1:
-                controller.rotate(channel=1, direction=1, speed=50)  # Rotate up
-            elif v == -1:
-                controller.rotate(channel=1, direction=-1, speed=50)  # Rotate down
-            else:
-                controller.stop(channel=1)
+        if v != 0:
+            controller.move_step(channel=1, direction=v_direction, speed=0.1)
+        else:
+            controller.stop(channel=1)  # Stop vertical movement
 
 if __name__ == '__main__':
     main()
