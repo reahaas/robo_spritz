@@ -17,10 +17,8 @@ class Direction_Module:
             tolerance (int): Pixel tolerance for centering detection (default: 10)
         """
         self.tolerance = tolerance
-        
-        # Load the face detection classifier
         self.face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            'haarcascade_frontalface_default.xml'
         )
         
         if self.face_cascade.empty():
