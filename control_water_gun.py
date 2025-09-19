@@ -1,22 +1,19 @@
 
 from maestro_linux_driver import Controller
 from direction_module import Direction_Module
+from frame_module import Frame_Module
 
 def main():
     camera = Frame_Module()
     navigator = Direction_Module(tolerance=10)
     controller = Controller()
 
-    if not controller.is_connected():
-        print("❌ Could not connect to Maestro controller.")
-        return
-
     print("Starting water gun control. Press Ctrl+C to stop.")
 
     try:
         while True:
             # Simulate getting a frame from the camera
-            frame = None
+            frame = camera.get_frame()
 
             # Get direction from the navigator
             h, v = navigator.get_direction(frame)
