@@ -30,7 +30,6 @@
 # >UscCmd.exe --servo 0,4000
 
 import os
-import shutil
 import subprocess
 from dataclasses import dataclass
 from typing import Optional
@@ -51,24 +50,21 @@ class ServoCommandResult:
 
 
 class Controller:
-    """Minimal wrapper for the Linux UscCmd utility focusing only on --servo.
+    """Very small wrapper for the Pololu UscCmd utility (Linux Maestro).
 
-    Usage:
-        ctrl = Controller()  # auto-locates ./UscCmd in CWD or PATH
-        ctrl.set_servo_target(0, 6000)
+    Path resolution is intentionally simple per user request:
+      - If executable_path is provided, use it as-is.
+      - Otherwise use <this_file_dir>/maestro-linux/UscCmd
     """
 
-    DEFAULT_EXECUTABLE_NAMES = ("UscCmd", "./UscCmd", "UscCmd.exe")
+    DEFAULT_EXECUTABLE_PATH = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'maestro-linux',
+        'UscCmd'
+    )
 
     def __init__(self, executable_path: Optional[str] = None, device_id: Optional[str] = None, check: bool = True):
-        """Create a controller.
-
-        Args:
-            executable_path: Explicit path to UscCmd. If None, tries common names and PATH.
-            device_id: Optional Maestro device ID (hex string shown by --list).
-            check: If True, verify the executable exists & is runnable on init.
-        """
-        self._executable = self._resolve_executable(executable_path)
+        self._executable = executable_path or self.DEFAULT_EXECUTABLE_PATH
         self._device_id = device_id
         if check:
             self._assert_available()
@@ -90,10 +86,10 @@ class Controller:
             self._validate_channel(channel)
             self._validate_target(target)
 
-        cmd = [self._executable, "--servo", f"{channel},{target}"]
+        cmd = [self._executable, '--servo', f'{channel},{target}']
         if self._device_id:
-            cmd += ["--device", self._device_id]
-        return self._run(cmd, timeout=timeout)
+            cmd += ['--device', self._device_id]
+        return self._run(cmd, timeout)
 
     def is_available(self) -> bool:
         """Return True if the underlying executable exists and is executable."""
@@ -103,41 +99,34 @@ class Controller:
         return self._executable
 
     # Context manager (no persistent resources but convenient for symmetry)
-    def __enter__(self) -> "Controller":  # noqa: D401
+    def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc, tb):  # noqa: D401
-        return False  # Don't suppress exceptions
+    def __exit__(self, exc_type, exc, tb):
+        return False
 
-    # --- Internal helpers ------------------------------------------------
-    def _resolve_executable(self, explicit: Optional[str]) -> str:
-        if explicit:
-            return explicit
-        # Try local directory first
-        for name in self.DEFAULT_EXECUTABLE_NAMES:
-            if os.path.isfile(name) and os.access(name, os.X_OK):
-                return name
-        # Try PATH search
-        for name in self.DEFAULT_EXECUTABLE_NAMES:
-            path = shutil.which(name)
-            if path:
-                return path
-        # Last resort: return first default, existence will be checked later
-        return self.DEFAULT_EXECUTABLE_NAMES[0]
-
+    # --- Internals ------------------------------------------------------
     def _assert_available(self):
-        if not self.is_available():
-            raise FileNotFoundError(f"UscCmd executable not found or not executable: {self._executable}")
+        if not os.path.isfile(self._executable):
+            raise FileNotFoundError(f"UscCmd executable not found: {self._executable}")
+        if not os.access(self._executable, os.X_OK):
+            # Try to add execute bit (on Unix-like systems)
+            try:
+                os.chmod(self._executable, 0o755)
+            except OSError:
+                pass
+            if not os.access(self._executable, os.X_OK):
+                raise FileNotFoundError(f"UscCmd not executable: {self._executable}")
 
     @staticmethod
     def _validate_channel(channel: int):
         if not isinstance(channel, int) or channel < 0:
-            raise ValueError("channel must be a non-negative integer")
+            raise ValueError('channel must be a non-negative int')
 
     @staticmethod
     def _validate_target(target: int):
         if not isinstance(target, int) or target < 0:
-            raise ValueError("target must be a non-negative integer (1/4 microsecond units)")
+            raise ValueError('target must be a non-negative int (1/4 microsecond units)')
 
     @staticmethod
     def _run(cmd: list[str], timeout: float) -> ServoCommandResult:
@@ -150,9 +139,8 @@ class Controller:
                 check=False,
             )
         except FileNotFoundError as e:
-            return ServoCommandResult(False, 127, "", str(e))
+            return ServoCommandResult(False, 127, '', str(e))
         except subprocess.TimeoutExpired as e:
-            return ServoCommandResult(False, 124, e.stdout or "", f"Timeout: {e.stderr or ''}".strip())
-
+            return ServoCommandResult(False, 124, e.stdout or '', f'Timeout: {e.stderr or ''}'.strip())
         success = completed.returncode == 0
         return ServoCommandResult(success, completed.returncode, completed.stdout.strip(), completed.stderr.strip())
