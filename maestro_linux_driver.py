@@ -31,6 +31,7 @@
 
 import os
 import subprocess
+import time
 from dataclasses import dataclass
 from typing import Optional
 
@@ -62,6 +63,11 @@ class Controller:
         'maestro-linux',
         'UscCmd'
     )
+
+    # Directional target constants
+    FULL_CW_TARGET = 4000      # fastest clockwise per user spec
+    FULL_CCW_TARGET = 8000     # fastest counter‑clockwise per user spec
+    STOP_TARGET = 5900         # neutral/stop per user spec
 
     def __init__(self, executable_path: Optional[str] = None, device_id: Optional[str] = None, check: bool = True):
         self._executable = executable_path or self.DEFAULT_EXECUTABLE_PATH
@@ -144,3 +150,66 @@ class Controller:
             return ServoCommandResult(False, 124, e.stdout or "", f"Timeout: {e.stderr or ''}".strip())
         success = completed.returncode == 0
         return ServoCommandResult(success, completed.returncode, completed.stdout.strip(), completed.stderr.strip())
+
+    # --- New directional helpers ---------------------------------------
+    def move_cw(self, channel: int, speed: float = 1.0, *, timeout: float = 3.0) -> ServoCommandResult:
+        """Move clockwise with a normalized speed (0..1).
+        speed=0 -> stop target, speed=1 -> FULL_CW_TARGET (4000)."""
+        target = self._scaled_target(self.STOP_TARGET, self.FULL_CW_TARGET, speed)
+        return self.set_servo_target(channel, target, timeout=timeout)
+
+    def move_ccw(self, channel: int, speed: float = 1.0, *, timeout: float = 3.0) -> ServoCommandResult:
+        """Move counter‑clockwise with a normalized speed (0..1).
+        speed=0 -> stop target, speed=1 -> FULL_CCW_TARGET (8000)."""
+        target = self._scaled_target(self.STOP_TARGET, self.FULL_CCW_TARGET, speed)
+        return self.set_servo_target(channel, target, timeout=timeout)
+
+    def stop(self, channel: int, *, timeout: float = 3.0) -> ServoCommandResult:
+        """Send stop / neutral target."""
+        return self.set_servo_target(channel, self.STOP_TARGET, timeout=timeout)
+
+    def move_step(self, channel: int, direction: str, speed: float, duration: float, *, timeout: float = 3.0) -> None:
+        """Run the servo in a direction at a normalized speed for a duration, then stop.
+
+        Args:
+            channel: Servo channel.
+            direction: 'cw' or 'ccw' (case-insensitive). Also accepts 'clockwise'/'counterclockwise'.
+            speed: Float 0..1 (clamped) where 1 is full speed.
+            duration: Seconds to run before issuing a stop. If <= 0, just stops immediately.
+            timeout: Per command timeout passed to underlying set_servo_target.
+        """
+        if duration is None:
+            duration = 0
+        try:
+            duration_f = float(duration)
+        except (TypeError, ValueError):
+            duration_f = 0
+        if direction is None:
+            raise ValueError("direction required ('cw' or 'ccw')")
+        dnorm = direction.strip().lower()
+        if dnorm in ("cw", "clockwise"):
+            self.move_cw(channel, speed, timeout=timeout)
+        elif dnorm in ("ccw", "counterclockwise", "counter-clockwise"):
+            self.move_ccw(channel, speed, timeout=timeout)
+        else:
+            raise ValueError("direction must be 'cw' or 'ccw'")
+        if duration_f > 0:
+            time.sleep(duration_f)
+        self.stop(channel, timeout=timeout)
+
+    # --- Internal helper for scaling -----------------------------------
+    @staticmethod
+    def _scaled_target(stop: int, full: int, speed: float) -> int:
+        """Linearly interpolate between stop and full using normalized speed.
+        Clamps speed into [0,1]. Works whether full < stop or full > stop."""
+        if speed is None:
+            speed = 1.0
+        try:
+            speed_f = float(speed)
+        except (TypeError, ValueError):
+            speed_f = 1.0
+        if speed_f < 0.0:
+            speed_f = 0.0
+        elif speed_f > 1.0:
+            speed_f = 1.0
+        return int(round(stop + (full - stop) * speed_f))
