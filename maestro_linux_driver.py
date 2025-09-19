@@ -141,6 +141,6 @@ class Controller:
         except FileNotFoundError as e:
             return ServoCommandResult(False, 127, '', str(e))
         except subprocess.TimeoutExpired as e:
-            return ServoCommandResult(False, 124, e.stdout or '', f'Timeout: {e.stderr or ''}'.strip())
+            return ServoCommandResult(False, 124, e.stdout or "", f"Timeout: {e.stderr or ''}".strip())
         success = completed.returncode == 0
         return ServoCommandResult(success, completed.returncode, completed.stdout.strip(), completed.stderr.strip())
