@@ -9,7 +9,7 @@ class Frame_Module:
 		self.picam2.configure(config)
 		self.picam2.start()
 		
-	def get_frame():
+	def get_frame(self):
 		try:
 			frame =self.picam2.capture_array()
 			return frame
