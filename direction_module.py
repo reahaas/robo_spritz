@@ -1,4 +1,5 @@
 import cv2
+from picamera2 import Picamera2
 
 class Direction_Module:
     """
@@ -81,7 +82,6 @@ class Direction_Module:
                 v = 0
         
         return h, v
-
 # Example usage
 # if __name__ == "__main__":
 #     # Initialize the direction module
