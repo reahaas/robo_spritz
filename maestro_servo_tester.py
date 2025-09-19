@@ -4,7 +4,7 @@ import time
 from maestro_linux_driver import Controller
 
 
-def test_servo_sequence(channel: int, device: str = None, executable_path: str = None, speed: float = 0.1, step_duration: float = 1.0):
+def test_servo_sequence(channel: int, device: str = None, executable_path: str = None, speed: float = 1.0, step_duration: float = 0.1):
     """Run a simple sequence using high-level controller methods.
     Sequence: step cw -> step ccw -> stop (implicit in each step) then explicit final stop.
     """
