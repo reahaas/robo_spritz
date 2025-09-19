@@ -25,7 +25,7 @@ def main():
         if h != 0:
             controller.move_step(channel=0, direction=h_direction, speed=0.1)
         else:
-            controller.move_step(channel=0)  # Stop horizontal movement
+            controller.stop(channel=0)  # Stop horizontal movement
 
         if v != 0:
             controller.move_step(channel=1, direction=v_direction, speed=0.1)
