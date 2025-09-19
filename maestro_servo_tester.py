@@ -25,8 +25,8 @@ def main():
     parser.add_argument('--sequence', action='store_true', help='Run CW/CCW/Stop sequence (high-level)')
     parser.add_argument('-x', '--executable', dest='executable', type=str, default=None,
                         help='Path to UscCmd executable (overrides default <script_dir>/maestro-linux/UscCmd)')
-    parser.add_argument('-s', '--speed', type=float, default=1.0, help='Normalized speed 0..1 for cw/ccw moves')
-    parser.add_argument('-d', '--delay', type=float, default=1.0, help='Delay (seconds) between sequence steps or duration for sequence steps')
+    parser.add_argument('-s', '--speed', type=float, default=0.1, help='Normalized speed 0..1 for cw/ccw moves')
+    parser.add_argument('-d', '--delay', type=float, default=0.1, help='Delay (seconds) between sequence steps or duration for sequence steps')
     parser.add_argument('--step', action='store_true', help='Run a single timed step (requires --direction and --duration)')
     parser.add_argument('--direction', type=str, help="Direction for --step or single step: 'cw' or 'ccw'")
     parser.add_argument('--duration', type=float, help='Duration (seconds) for --step single movement')
