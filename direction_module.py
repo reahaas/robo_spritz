@@ -1,4 +1,5 @@
 import cv2
+from picamera2 import Picamera2
 
 class Direction_Module:
     """
@@ -20,7 +21,7 @@ class Direction_Module:
         
         # Load the face detection classifier
         self.face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+            'haarcascade_frontalface_default.xml'
         )
         
         if self.face_cascade.empty():
@@ -83,7 +84,6 @@ class Direction_Module:
                 v = 0
         
         return h, v
-
 # Example usage
 # if __name__ == "__main__":
 #     # Initialize the direction module
