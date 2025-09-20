@@ -168,7 +168,7 @@ class Controller:
         """Send stop / neutral target."""
         return self.set_servo_target(channel, self.STOP_TARGET, timeout=timeout)
 
-    def move_step(self, channel: int, direction: str, speed: float = 0.5, duration: float = 0, *, timeout: float = 3.0) -> None:
+    def move_step(self, channel: int, direction: str, speed: float = 0.2, duration: float = 0, *, timeout: float = 3.0) -> None:
         """Run the servo in a direction at a normalized speed for a duration, then stop.
 
         Args:
