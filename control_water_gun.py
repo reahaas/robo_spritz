@@ -11,6 +11,7 @@ def parse_args():
     parser.add_argument('--disable-horizontal', action='store_true', help='Disable horizontal movement')
     parser.add_argument('--disable-vertical', action='store_true', help='Disable vertical movement')
     parser.add_argument('-d', '--delay', type=float, default=0.1, help='Delay (seconds) between sequence steps or duration for sequence steps')
+    parser.add_argument('--speed', type=float, default=0.2, help='Movement speed (default: 0.2)')
     return parser.parse_args()
 
 def main():
@@ -58,7 +59,7 @@ def main():
                 print("Horizontal movement disabled (would move)")
         else:
             if h != 0:
-                controller.move_step(channel=1, direction=h_direction, speed=1)
+                controller.move_step(channel=1, direction=h_direction, speed=args.speed)
             else:
                 print("Stopping horizontal movement")
                 controller.stop(channel=1)  # Stop horizontal movement
@@ -69,7 +70,7 @@ def main():
                 print("Vertical movement disabled (would move)")
         else:
             if v != 0:
-                controller.move_step(channel=0, direction=v_direction, speed=1)
+                controller.move_step(channel=0, direction=v_direction, speed=args.speed)
             else:
                 print("Stopping vertical movement")
                 controller.stop(channel=0)  # Stop vertical movement
