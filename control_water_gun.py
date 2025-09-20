@@ -1,3 +1,5 @@
+import datetime
+
 from maestro_linux_driver import Controller
 from direction_module import Direction_Module
 from frame_module import Frame_Module, display_camera, get_center
@@ -8,6 +10,7 @@ def parse_args():
     parser.add_argument('--no-display', action='store_true', help='Disable camera window display')
     parser.add_argument('--disable-horizontal', action='store_true', help='Disable horizontal movement')
     parser.add_argument('--disable-vertical', action='store_true', help='Disable vertical movement')
+    parser.add_argument('-d', '--delay', type=float, default=0.1, help='Delay (seconds) between sequence steps or duration for sequence steps')
     return parser.parse_args()
 
 def main():
@@ -17,6 +20,8 @@ def main():
     controller = Controller()
 
     print("Starting water gun control. Press Ctrl+C to stop.")
+
+    last_movement = datetime.now()
 
     while True:
         # Simulate getting a frame from the camera
@@ -31,6 +36,14 @@ def main():
 
         if not args.no_display:
             display_camera(frame, face_position, direction, center)
+
+        # return if delay is not meat:
+        if args.delay > 0:
+            current_time = datetime.now()
+            time_from_last_movement = current_time - last_movement
+            if time_from_last_movement < datetime.timedelta(seconds=args.delay):
+                continue
+
 
 
         # Control the water gun based on direction
