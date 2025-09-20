@@ -25,11 +25,38 @@ class Direction_Module:
         if self.face_cascade.empty():
             raise ValueError("Failed to load face detection classifier")
     
+    def get_face_position(self, frame):
+        """
+        Detect the first face in the frame and return its center position (x, y).
+
+        Args:
+            frame: OpenCV image frame (BGR format)
+
+        Returns:
+            tuple: (face_center_x, face_center_y) or (None, None) if no face detected
+        """
+        if frame is None:
+            return None, None
+
+        # Convert frame to grayscale for face detection
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Detect faces in the frame
+        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
+
+        # Process faces (using same logic as camera_capture.py)
+        for (x, y, w, h_rect) in faces:
+            # Calculate face center (use the first detected face for guidance)
+            face_center_x = x + w // 2
+            face_center_y = y + h_rect // 2
+            return face_center_x, face_center_y
+
+        return None, None
+
     def get_direction(self, frame):
         """
-        Detect faces in the given frame and calculate directional parameters.
-        Uses the exact same logic as camera_capture.py.
-        
+        Use get_face_position to get the face center, then calculate direction (h, v).
+
         Args:
             frame: OpenCV image frame (BGR format)
             
@@ -41,28 +68,17 @@ class Direction_Module:
         if frame is None:
             return 0, 0
         
-        # Convert frame to grayscale for face detection
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        
         # Get frame dimensions
         frame_height, frame_width = frame.shape[:2]
         frame_center_x = frame_width // 2
         frame_center_y = frame_height // 2
         
-        # Detect faces in the frame
-        faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
-        
+        # Get face center position
+        face_center_x, face_center_y = self.get_face_position(frame)
+
         # Initialize default values
         h, v = 0, 0  # Default values
-        face_center_x, face_center_y = None, None
-        
-        # Process faces (using same logic as camera_capture.py)
-        for (x, y, w, h_rect) in faces:
-            # Calculate face center (use the first detected face for guidance)
-            if face_center_x is None:
-                face_center_x = x + w // 2
-                face_center_y = y + h_rect // 2
-        
+
         if face_center_x is not None:
             # Calculate offsets
             offset_x = face_center_x - frame_center_x
