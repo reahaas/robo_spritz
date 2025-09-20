@@ -44,14 +44,14 @@ class Direction_Module:
         # Detect faces in the frame
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
 
-        # Process faces (using same logic as camera_capture.py)
-        for (x, y, w, h_rect) in faces:
-            # Calculate face center (use the first detected face for guidance)
-            face_center_x = x + w // 2
-            face_center_y = y + h_rect // 2
-            return face_center_x, face_center_y
+        if not faces:
+            return None, None
 
-        return None, None
+        # get bigest face
+        faces = sorted(faces, key=lambda face: face[2] * face[3], reverse=True)
+
+        bigest_face = faces[0]
+        return bigest_face[0], bigest_face[1]
 
     def get_direction(self, frame):
         """
