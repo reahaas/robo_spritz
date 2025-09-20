@@ -38,13 +38,13 @@ def main():
         print(f"{h=}, {h_direction=}, {v=}, {v_direction=}")
 
         if h != 0:
-            controller.move_step(channel=1, direction=h_direction, speed=0.1)
+            controller.move_step(channel=1, direction=h_direction, speed=1)
         else:
             print("Stopping horizontal movement")
             controller.stop(channel=1)  # Stop horizontal movement
 
         if v != 0:
-            controller.move_step(channel=0, direction=v_direction, speed=0.1)
+            controller.move_step(channel=0, direction=v_direction, speed=1)
         else:
             print("Stopping horizontal movement")
             controller.stop(channel=0)  # Stop vertical movement
