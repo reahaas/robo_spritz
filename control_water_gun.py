@@ -6,6 +6,8 @@ import argparse
 def parse_args():
     parser = argparse.ArgumentParser(description="Water gun controller using face direction")
     parser.add_argument('--no-display', action='store_true', help='Disable camera window display')
+    parser.add_argument('--disable-horizontal', action='store_true', help='Disable horizontal movement')
+    parser.add_argument('--disable-vertical', action='store_true', help='Disable vertical movement')
     return parser.parse_args()
 
 def main():
@@ -32,23 +34,32 @@ def main():
 
 
         # Control the water gun based on direction
-
         h_direction = "cw" if h==1 else "ccw"
         v_direction = "cw" if v==1 else "ccw"
 
         print(f"{h=}, {h_direction=}, {v=}, {v_direction=}")
 
-        if h != 0:
-            controller.move_step(channel=1, direction=h_direction, speed=1)
+        # Horizontal movement
+        if args.disable_horizontal:
+            if h != 0:
+                print("Horizontal movement disabled (would move)")
         else:
-            print("Stopping horizontal movement")
-            controller.stop(channel=1)  # Stop horizontal movement
+            if h != 0:
+                controller.move_step(channel=1, direction=h_direction, speed=1)
+            else:
+                print("Stopping horizontal movement")
+                controller.stop(channel=1)  # Stop horizontal movement
 
-        if v != 0:
-            controller.move_step(channel=0, direction=v_direction, speed=1)
+        # Vertical movement
+        if args.disable_vertical:
+            if v != 0:
+                print("Vertical movement disabled (would move)")
         else:
-            print("Stopping horizontal movement")
-            controller.stop(channel=0)  # Stop vertical movement
+            if v != 0:
+                controller.move_step(channel=0, direction=v_direction, speed=1)
+            else:
+                print("Stopping vertical movement")
+                controller.stop(channel=0)  # Stop vertical movement
 
 if __name__ == '__main__':
     main()

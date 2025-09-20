@@ -12,6 +12,7 @@ class Frame_Module:
 
     def get_frame(self):
             frame = self.picam2.capture_array()
+            frame = cv2.rotate(frame, cv2.ROTATE_180)
             return frame
 
 def display_camera(frame, face_position = None, direction = None, center = None):

@@ -46,7 +46,7 @@ class Direction_Module:
         # Detect faces in the frame
         faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
 
-        if not faces:
+        if len(faces) == 0:
             return None, None
 
         # get bigest face
