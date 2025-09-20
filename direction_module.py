@@ -1,5 +1,7 @@
 import cv2
 from picamera2 import Picamera2
+from frame_module import get_center
+
 
 class Direction_Module:
     """
@@ -10,7 +12,7 @@ class Direction_Module:
     using the same logic as camera_capture.py.
     """
     
-    def __init__(self, tolerance=10):
+    def __init__(self, tolerance=50):
         """
         Initialize the Direction_Module.
         
@@ -69,9 +71,7 @@ class Direction_Module:
             return 0, 0
         
         # Get frame dimensions
-        frame_height, frame_width = frame.shape[:2]
-        frame_center_x = frame_width // 2
-        frame_center_y = frame_height // 2
+        frame_center_x, frame_center_y = get_center(frame)
         
         # Get face center position
         face_center_x, face_center_y = self.get_face_position(frame)

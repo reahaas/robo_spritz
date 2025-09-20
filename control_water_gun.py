@@ -1,6 +1,6 @@
 from maestro_linux_driver import Controller
 from direction_module import Direction_Module
-from frame_module import Frame_Module, display_camera
+from frame_module import Frame_Module, display_camera, get_center
 import argparse
 
 def parse_args():
@@ -21,13 +21,14 @@ def main():
         frame = camera.get_frame()
 
         face_position = navigator.get_face_position(frame)
+        center = get_center(frame)
 
         # Get direction from the navigator
         direction = navigator.get_direction(frame)
         h, v = direction
 
         if not args.no_display:
-            display_camera(frame, face_position, direction)
+            display_camera(frame, face_position, direction, center)
 
 
         # Control the water gun based on direction
